@@ -1,13 +1,8 @@
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import {ActivityIndicator, FlatList, Text, View} from 'react-native';
+import {logoutUser} from '../../api';
 import {RootStackParamList} from '../../routes/RootNavigator';
 import colors from '../../styles/colors';
 import {
@@ -18,10 +13,9 @@ import {
   USER_FS,
 } from '../../utils/constants';
 import {deleteJson, readJson, writeJson} from '../../utils/fs';
-import styles from './HomeScreenStyle';
-import {logoutUser} from '../../api';
 import {removeItemFromKeychain} from '../../utils/keychain';
 import logger from '../../utils/logger';
+import styles from './HomeScreenStyle';
 
 type IUserData = {
   acount: string;
