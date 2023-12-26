@@ -39,7 +39,11 @@ const RootNavigator = () => {
       }}
       initialRouteName={isLogin ? 'HomeScreen' : 'LoginScreen'}>
       <RootStack.Screen name={'LoginScreen'} component={LoginScreen} />
-      <RootStack.Screen name={'HomeScreen'} component={HomeScreen} />
+      <RootStack.Screen
+        name={'HomeScreen'}
+        component={HomeScreen}
+        options={{headerTitle: 'Account number: ----'}}
+      />
     </RootStack.Navigator>
   );
 };

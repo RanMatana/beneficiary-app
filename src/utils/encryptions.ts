@@ -1,5 +1,5 @@
 import CryptoJS from 'react-native-crypto-js';
-import {CRYPTO_KEY} from '@env';
+import {CRYPTO_KEY} from './constants';
 
 export const encrypt = (data: object | string) => {
   const crypto = CryptoJS.AES.encrypt(
