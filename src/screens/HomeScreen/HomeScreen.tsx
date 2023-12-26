@@ -1,11 +1,27 @@
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
-import {Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import {RootStackParamList} from '../../routes/RootNavigator';
-import {END_POINT_USER, USER_FS} from '../../utils/constants';
+import colors from '../../styles/colors';
+import {
+  BENEFICIARY_FS,
+  END_POINT_BENEFICIARY,
+  END_POINT_USER,
+  LOGIN_SESSION_KEYCHAIN_KEY,
+  USER_FS,
+} from '../../utils/constants';
+import {deleteJson, readJson, writeJson} from '../../utils/fs';
 import styles from './HomeScreenStyle';
-import {readJson, writeJson} from '../../utils/fs';
+import {logoutUser} from '../../api';
+import {removeItemFromKeychain} from '../../utils/keychain';
+import logger from '../../utils/logger';
 
 type IUserData = {
   acount: string;
@@ -13,35 +29,137 @@ type IUserData = {
   username: string;
 };
 
+type IContactsData = {
+  contacts: ContactType[];
+};
+
+type ContactType = {
+  name: string;
+  acount: string;
+};
+
+type FlatListItem = {
+  item: ContactType;
+  index: number;
+};
+
 const HomeScreen = () => {
-  const [user, setUser] = useState<IUserData>();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [user, setUser] = useState<IUserData>();
+  const [beneficiaries, setBeneficiaries] = useState<IContactsData>({
+    contacts: [],
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchUser = async () => {
+      const userDataJson = (await readJson(USER_FS)) as IUserData;
+      if (userDataJson) {
+        navigation.setOptions({
+          headerTitle: `Account number: ${userDataJson.acount}`,
+        });
+        setUser(userDataJson);
+      }
       const response = await fetch(END_POINT_USER);
       if (response) {
-        const data = (await response.json()) as IUserData;
-        navigation.setOptions({headerTitle: `Account number: ${data.acount}`});
-        await writeJson(USER_FS, data);
-        setUser(data);
+        const dataUserResponse = (await response.json()) as IUserData;
+        navigation.setOptions({
+          headerTitle: `Account number: ${dataUserResponse.acount}`,
+        });
+        await writeJson(USER_FS, dataUserResponse);
+        setUser(dataUserResponse);
       }
     };
-    const getUser = async () => {
-      const data = (await readJson(USER_FS)) as IUserData;
-      if (data) {
-        navigation.setOptions({headerTitle: `Account number: ${data.acount}`});
-        setUser(data);
+    const fetchBeneficiary = async () => {
+      const beneficiaryDataJson = (await readJson(
+        BENEFICIARY_FS,
+      )) as IContactsData;
+      if (beneficiaryDataJson) {
+        setBeneficiaries(beneficiaryDataJson);
       }
+      setTimeout(async () => {
+        const response = await fetch(END_POINT_BENEFICIARY);
+        if (response) {
+          const dataBeneficiaryResponse =
+            (await response.json()) as IContactsData;
+          await writeJson(BENEFICIARY_FS, dataBeneficiaryResponse);
+          setBeneficiaries(dataBeneficiaryResponse);
+        }
+        setIsLoading(false);
+      }, 2000);
     };
-    getUser();
     fetchUser();
+    fetchBeneficiary();
   }, []);
+
+  const renderItem = ({item, index}: FlatListItem) => {
+    const lastItem = index === beneficiaries?.contacts?.length - 1;
+    return (
+      <>
+        <View
+          key={index}
+          style={{
+            height: 50,
+            width: '95%',
+            backgroundColor: colors.white,
+            margin: 5,
+            padding: 5,
+            alignSelf: 'center',
+            borderWidth: 2,
+            borderColor: colors.primary,
+            borderRadius: 8,
+          }}>
+          <Text style={{color: colors.black}}>{item.name}</Text>
+          <Text style={{color: colors.black}}>{item.acount}</Text>
+        </View>
+        {lastItem && <View style={{height: 50}} />}
+      </>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <Text>HomeScreen</Text>
+      <View style={styles.container_title}>
+        <Text
+          onPress={async () => {
+            await logoutUser();
+            await removeItemFromKeychain(LOGIN_SESSION_KEYCHAIN_KEY);
+            await deleteJson(BENEFICIARY_FS);
+            await deleteJson(USER_FS);
+            navigation.replace('LoginScreen');
+          }}
+          style={styles.text_disconnect}>
+          Disconnect
+        </Text>
+        <Text
+          onPress={() => {
+            logger('Should add beneficiary');
+          }}
+          style={styles.text_beneficiary}>
+          + Add Beneficiary
+        </Text>
+        <Text
+          onPress={async () => {
+            await logoutUser();
+            await removeItemFromKeychain(LOGIN_SESSION_KEYCHAIN_KEY);
+            await deleteJson(BENEFICIARY_FS);
+            await deleteJson(USER_FS);
+            navigation.replace('LoginScreen');
+          }}
+          style={styles.text_disconnect}>
+          Disconnect
+        </Text>
+        <Text style={styles.title}>Hello, {user?.username}</Text>
+        <Text style={styles.text_balance}>Balance: {user?.balance}</Text>
+      </View>
+      {isLoading && <ActivityIndicator size="large" style={{paddingTop: 20}} />}
+      <FlatList
+        data={beneficiaries.contacts}
+        renderItem={renderItem}
+        keyExtractor={(_, index) => index.toString()}
+        scrollEnabled
+      />
     </View>
   );
 };
