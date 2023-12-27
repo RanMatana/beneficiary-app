@@ -1,24 +1,25 @@
 import {NavigationContainer} from '@react-navigation/native';
 import React from 'react';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import Boot from './src/routes/Boot';
 import {StatusBar} from 'react-native';
-import {removeItemFromKeychain} from './src/utils/keychain';
-import {LOGIN_SESSION_KEYCHAIN_KEY} from './src/utils/constants';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {Provider} from 'react-redux';
+import {store} from './src/redux/store';
+import Boot from './src/routes/Boot';
 
 const App = () => {
-  // removeItemFromKeychain(LOGIN_SESSION_KEYCHAIN_KEY);
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <StatusBar
-          backgroundColor="transparent"
-          translucent
-          animated
-          barStyle="dark-content"
-        />
-        <Boot />
-      </NavigationContainer>
+      <Provider store={store}>
+        <NavigationContainer>
+          <StatusBar
+            backgroundColor="transparent"
+            translucent
+            animated
+            barStyle="dark-content"
+          />
+          <Boot />
+        </NavigationContainer>
+      </Provider>
     </SafeAreaProvider>
   );
 };

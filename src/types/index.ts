@@ -1,4 +1,14 @@
-declare module '*.png' {
-  const value: any;
-  export = value;
-}
+export type IUserData = {
+  acount: string;
+  balance: string;
+  username: string;
+};
+
+export type IContactsData = {
+  contacts: ContactType[];
+};
+
+export type ContactType = {
+  name: string;
+  acount: string;
+};
