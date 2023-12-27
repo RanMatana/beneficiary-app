@@ -1,7 +1,13 @@
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {logoutUser} from '../../api';
 import {RootStackParamList} from '../../routes/RootNavigator';
 import colors from '../../styles/colors';
@@ -91,23 +97,14 @@ const HomeScreen = () => {
     const lastItem = index === beneficiaries?.contacts?.length - 1;
     return (
       <>
-        <View
-          key={index}
-          style={{
-            height: 50,
-            width: '95%',
-            backgroundColor: colors.white,
-            margin: 5,
-            padding: 5,
-            alignSelf: 'center',
-            borderWidth: 2,
-            borderColor: colors.primary,
-            borderRadius: 8,
-          }}>
+        <View key={index} style={styles.row}>
           <Text style={{color: colors.black}}>{item.name}</Text>
           <Text style={{color: colors.black}}>{item.acount}</Text>
+          <TouchableOpacity style={styles.btn_row}>
+            <Text style={styles.text_transfer}>Transfer</Text>
+          </TouchableOpacity>
         </View>
-        {lastItem && <View style={{height: 50}} />}
+        {lastItem && <View style={styles.space} />}
       </>
     );
   };

@@ -38,4 +38,26 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     paddingVertical: 20,
   },
+  row: {
+    height: 50,
+    width: '100%',
+    margin: 5,
+    padding: 10,
+    alignSelf: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: colors.gray,
+  },
+  btn_row: {
+    position: 'absolute',
+    right: 10,
+    top: 5,
+    backgroundColor: colors.primary,
+    padding: 10,
+    borderRadius: 8,
+  },
+  text_transfer: {
+    color: colors.white,
+    fontWeight: '600',
+  },
+  space: {height: 50},
 });

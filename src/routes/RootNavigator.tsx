@@ -38,7 +38,11 @@ const RootNavigator = () => {
         headerTitleStyle: {color: colors.white},
       }}
       initialRouteName={isLogin ? 'HomeScreen' : 'LoginScreen'}>
-      <RootStack.Screen name={'LoginScreen'} component={LoginScreen} />
+      <RootStack.Screen
+        name={'LoginScreen'}
+        component={LoginScreen}
+        options={{headerTitle: 'Login'}}
+      />
       <RootStack.Screen
         name={'HomeScreen'}
         component={HomeScreen}

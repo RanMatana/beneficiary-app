@@ -24,19 +24,20 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
+        <Text style={[styles.text, styles.text_header]}>Welcome back!</Text>
         <TextInput
           value={username}
           onChangeText={setUsername}
           placeholder="username"
           style={styles.input}
-          placeholderTextColor={colors.white}
+          placeholderTextColor={colors.gray}
         />
         <TextInput
           value={password}
           onChangeText={setPassword}
           placeholder="password"
           style={styles.input}
-          placeholderTextColor={colors.white}
+          placeholderTextColor={colors.gray}
         />
         <TouchableOpacity
           onPress={onSubmit}
