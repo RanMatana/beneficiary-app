@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 import {useSharedValue} from 'react-native-reanimated';
 import {logoutUser} from '../../api';
-import {CustomModal, NewBeneficiaryPopup} from '../../components';
+import {
+  CustomModal,
+  CustomTextInput,
+  NewBeneficiaryPopup,
+} from '../../components';
 import {useAppDispatch, useAppSelector} from '../../redux';
 import {setBeneficiaries} from '../../redux/features/BeneficiariesSlice';
 import {RootState} from '../../redux/store';
@@ -28,6 +32,7 @@ import {deleteJson, readJson, writeJson} from '../../utils/fs';
 import {removeItemFromKeychain} from '../../utils/keychain';
 import logger from '../../utils/logger';
 import styles from './HomeScreenStyle';
+import {useDebounce} from '../../hooks';
 
 type FlatListItem = {
   item: ContactType;
@@ -42,6 +47,33 @@ const HomeScreen = () => {
   const dispatch = useAppDispatch();
   const {contacts} = useAppSelector((state: RootState) => state.beneficiaries);
   const newBeneficiaryPopup = useSharedValue(0);
+  const [search, setSearch] = useState('');
+  const debouncedSearchTerm = useDebounce(search, 500);
+  const [data, setData] = useState<ContactType[]>(contacts);
+
+  const autocompleteMatch = useCallback(
+    (input: string) => {
+      if (input === '') {
+        return [];
+      }
+      var reg = new RegExp(input);
+
+      return contacts.filter(function (term) {
+        if (term.name.toLocaleLowerCase().match(reg)) {
+          return term;
+        }
+      });
+    },
+    [contacts],
+  );
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      setData(autocompleteMatch(search.toLocaleLowerCase()));
+    } else {
+      setData(contacts);
+    }
+  }, [autocompleteMatch, debouncedSearchTerm, search]);
 
   const handleError = (error: any) => {
     navigation.setOptions({
@@ -80,6 +112,7 @@ const HomeScreen = () => {
           BENEFICIARY_FS,
         )) as IContactsData;
         if (beneficiaryDataJson) {
+          setData(beneficiaryDataJson.contacts);
           dispatch(setBeneficiaries(beneficiaryDataJson.contacts));
         }
         setTimeout(async () => {
@@ -88,6 +121,7 @@ const HomeScreen = () => {
             const dataBeneficiaryResponse =
               (await response.json()) as IContactsData;
             await writeJson(BENEFICIARY_FS, dataBeneficiaryResponse);
+            setData(beneficiaryDataJson.contacts);
             dispatch(setBeneficiaries(beneficiaryDataJson.contacts));
           }
           setIsLoading(false);
@@ -146,8 +180,14 @@ const HomeScreen = () => {
         <Text style={styles.text_balance}>Balance: {user?.balance}</Text>
       </View>
       {isLoading && <ActivityIndicator size="large" style={{paddingTop: 20}} />}
+      <CustomTextInput
+        value={search}
+        onChangeText={setSearch}
+        style={{alignSelf: 'center', width: '90%'}}
+        placeholder="Search"
+      />
       <FlatList
-        data={contacts}
+        data={data}
         renderItem={renderItem}
         keyExtractor={(_, index) => index.toString()}
         scrollEnabled
