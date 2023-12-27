@@ -1,12 +1,13 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
-import {HomeScreen, LoginScreen} from '../screens';
 import {checkLogin} from '../api';
+import {ErrorScreen, HomeScreen, LoginScreen} from '../screens';
 import colors from '../styles/colors';
 
 export type RootStackParamList = {
   LoginScreen: undefined;
   HomeScreen: undefined;
+  ErrorScreen: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -36,6 +37,8 @@ const RootNavigator = () => {
       screenOptions={{
         headerStyle: {backgroundColor: colors.primary},
         headerTitleStyle: {color: colors.white},
+        headerBackTitle: 'Back',
+        headerTintColor: colors.white,
       }}
       initialRouteName={isLogin ? 'HomeScreen' : 'LoginScreen'}>
       <RootStack.Screen
@@ -49,6 +52,11 @@ const RootNavigator = () => {
         options={{
           headerTitle: 'Loading your account...',
         }}
+      />
+      <RootStack.Screen
+        name={'ErrorScreen'}
+        component={ErrorScreen}
+        options={{headerTitle: 'Error'}}
       />
     </RootStack.Navigator>
   );

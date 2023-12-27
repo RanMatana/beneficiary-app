@@ -16,9 +16,13 @@ const LoginScreen = () => {
   const disabled = username && password ? true : false;
 
   const onSubmit = () => {
-    loginUser({username, password}).then(() => {
-      navigation.replace('HomeScreen');
-    });
+    loginUser({username, password})
+      .then(() => {
+        navigation.replace('HomeScreen');
+      })
+      .catch(() => {
+        navigation.navigate('ErrorScreen');
+      });
   };
 
   return (

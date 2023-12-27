@@ -10,13 +10,10 @@ import {
 } from 'react-native';
 import {useSharedValue} from 'react-native-reanimated';
 import {logoutUser} from '../../api';
-import {
-  NewBeneficiaryPopup,
-  CustomModal,
-  CustomTextInput,
-} from '../../components';
+import {CustomModal, NewBeneficiaryPopup} from '../../components';
 import {useAppDispatch, useAppSelector} from '../../redux';
 import {setBeneficiaries} from '../../redux/features/BeneficiariesSlice';
+import {RootState} from '../../redux/store';
 import {RootStackParamList} from '../../routes/RootNavigator';
 import colors from '../../styles/colors';
 import {ContactType, IContactsData, IUserData} from '../../types';
@@ -31,7 +28,6 @@ import {deleteJson, readJson, writeJson} from '../../utils/fs';
 import {removeItemFromKeychain} from '../../utils/keychain';
 import logger from '../../utils/logger';
 import styles from './HomeScreenStyle';
-import {RootState} from '../../redux/store';
 
 type FlatListItem = {
   item: ContactType;
@@ -47,43 +43,60 @@ const HomeScreen = () => {
   const {contacts} = useAppSelector((state: RootState) => state.beneficiaries);
   const newBeneficiaryPopup = useSharedValue(0);
 
+  const handleError = (error: any) => {
+    navigation.setOptions({
+      headerTitle: '',
+    });
+    logger(error);
+    navigation.navigate('ErrorScreen');
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
-      const userDataJson = (await readJson(USER_FS)) as IUserData;
-      if (userDataJson) {
-        navigation.setOptions({
-          headerTitle: `Account number: ${userDataJson.acount}`,
-        });
-        setUser(userDataJson);
-      }
-      const response = await fetch(END_POINT_USER);
-      if (response) {
-        const dataUserResponse = (await response.json()) as IUserData;
-        navigation.setOptions({
-          headerTitle: `Account number: ${dataUserResponse.acount}`,
-        });
-        await writeJson(USER_FS, dataUserResponse);
-        setUser(dataUserResponse);
+      try {
+        const userDataJson = (await readJson(USER_FS)) as IUserData;
+        if (userDataJson) {
+          navigation.setOptions({
+            headerTitle: `Account number: ${userDataJson.acount}`,
+          });
+          setUser(userDataJson);
+        }
+        const response = await fetch(END_POINT_USER);
+        if (response) {
+          const dataUserResponse = (await response.json()) as IUserData;
+          navigation.setOptions({
+            headerTitle: `Account number: ${dataUserResponse.acount}`,
+          });
+          await writeJson(USER_FS, dataUserResponse);
+          setUser(dataUserResponse);
+        }
+      } catch (error) {
+        handleError(error);
       }
     };
     const fetchBeneficiary = async () => {
-      const beneficiaryDataJson = (await readJson(
-        BENEFICIARY_FS,
-      )) as IContactsData;
-      if (beneficiaryDataJson) {
-        dispatch(setBeneficiaries(beneficiaryDataJson.contacts));
-      }
-      setTimeout(async () => {
-        const response = await fetch(END_POINT_BENEFICIARY);
-        if (response) {
-          const dataBeneficiaryResponse =
-            (await response.json()) as IContactsData;
-          await writeJson(BENEFICIARY_FS, dataBeneficiaryResponse);
+      try {
+        const beneficiaryDataJson = (await readJson(
+          BENEFICIARY_FS,
+        )) as IContactsData;
+        if (beneficiaryDataJson) {
           dispatch(setBeneficiaries(beneficiaryDataJson.contacts));
         }
-        setIsLoading(false);
-      }, 2000);
+        setTimeout(async () => {
+          const response = await fetch(END_POINT_BENEFICIARY);
+          if (response) {
+            const dataBeneficiaryResponse =
+              (await response.json()) as IContactsData;
+            await writeJson(BENEFICIARY_FS, dataBeneficiaryResponse);
+            dispatch(setBeneficiaries(beneficiaryDataJson.contacts));
+          }
+          setIsLoading(false);
+        }, 2000);
+      } catch (error) {
+        handleError(error);
+      }
     };
+
     fetchUser();
     fetchBeneficiary();
   }, []);
@@ -109,18 +122,17 @@ const HomeScreen = () => {
     );
   };
 
+  const handleDisconnect = async () => {
+    await logoutUser();
+    await removeItemFromKeychain(LOGIN_SESSION_KEYCHAIN_KEY);
+    await deleteJson(BENEFICIARY_FS);
+    await deleteJson(USER_FS);
+    navigation.replace('LoginScreen');
+  };
   return (
     <View style={styles.container}>
       <View style={styles.container_title}>
-        <Text
-          onPress={async () => {
-            await logoutUser();
-            await removeItemFromKeychain(LOGIN_SESSION_KEYCHAIN_KEY);
-            await deleteJson(BENEFICIARY_FS);
-            await deleteJson(USER_FS);
-            navigation.replace('LoginScreen');
-          }}
-          style={styles.text_disconnect}>
+        <Text onPress={handleDisconnect} style={styles.text_disconnect}>
           Disconnect
         </Text>
         <Text
@@ -129,17 +141,6 @@ const HomeScreen = () => {
           }}
           style={styles.text_beneficiary}>
           + Add Beneficiary
-        </Text>
-        <Text
-          onPress={async () => {
-            await logoutUser();
-            await removeItemFromKeychain(LOGIN_SESSION_KEYCHAIN_KEY);
-            await deleteJson(BENEFICIARY_FS);
-            await deleteJson(USER_FS);
-            navigation.replace('LoginScreen');
-          }}
-          style={styles.text_disconnect}>
-          Disconnect
         </Text>
         <Text style={styles.title}>Hello, {user?.username}</Text>
         <Text style={styles.text_balance}>Balance: {user?.balance}</Text>
