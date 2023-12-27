@@ -20,8 +20,10 @@ const LoginScreen = () => {
       .then(() => {
         navigation.replace('HomeScreen');
       })
-      .catch(() => {
-        navigation.navigate('ErrorScreen');
+      .catch(error => {
+        navigation.navigate('ErrorScreen', {
+          text: JSON.stringify(error),
+        });
       });
   };
 

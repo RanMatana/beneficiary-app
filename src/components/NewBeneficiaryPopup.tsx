@@ -71,16 +71,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingVertical: 20,
   },
-  btn: {
-    marginVertical: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '80%',
-    height: 70,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: colors.white,
-  },
   text: {fontSize: 18, color: colors.white, fontWeight: '500'},
 });

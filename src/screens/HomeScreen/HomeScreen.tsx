@@ -13,8 +13,11 @@ import {logoutUser} from '../../api';
 import {
   CustomModal,
   CustomTextInput,
+  DisconnectPopup,
   NewBeneficiaryPopup,
+  TransferPopup,
 } from '../../components';
+import {useDebounce} from '../../hooks';
 import {useAppDispatch, useAppSelector} from '../../redux';
 import {setBeneficiaries} from '../../redux/features/BeneficiariesSlice';
 import {RootState} from '../../redux/store';
@@ -32,7 +35,6 @@ import {deleteJson, readJson, writeJson} from '../../utils/fs';
 import {removeItemFromKeychain} from '../../utils/keychain';
 import logger from '../../utils/logger';
 import styles from './HomeScreenStyle';
-import {useDebounce} from '../../hooks';
 
 type FlatListItem = {
   item: ContactType;
@@ -47,6 +49,8 @@ const HomeScreen = () => {
   const dispatch = useAppDispatch();
   const {contacts} = useAppSelector((state: RootState) => state.beneficiaries);
   const newBeneficiaryPopup = useSharedValue(0);
+  const disconnectPopup = useSharedValue(0);
+  const transferPopup = useSharedValue(0);
   const [search, setSearch] = useState('');
   const debouncedSearchTerm = useDebounce(search, 500);
   const [data, setData] = useState<ContactType[]>(contacts);
@@ -80,7 +84,9 @@ const HomeScreen = () => {
       headerTitle: '',
     });
     logger(error);
-    navigation.navigate('ErrorScreen');
+    navigation.navigate('ErrorScreen', {
+      text: JSON.stringify(error),
+    });
   };
 
   useEffect(() => {
@@ -145,9 +151,7 @@ const HomeScreen = () => {
           <TouchableOpacity
             style={styles.btn_row}
             hitSlop={10}
-            onPress={() => {
-              logger('Should transfer');
-            }}>
+            onPress={() => (transferPopup.value = 1)}>
             <Text style={styles.text_transfer}>Transfer</Text>
           </TouchableOpacity>
         </View>
@@ -163,10 +167,13 @@ const HomeScreen = () => {
     await deleteJson(USER_FS);
     navigation.replace('LoginScreen');
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.container_title}>
-        <Text onPress={handleDisconnect} style={styles.text_disconnect}>
+        <Text
+          onPress={() => (disconnectPopup.value = 1)}
+          style={styles.text_disconnect}>
           Disconnect
         </Text>
         <Text
@@ -195,6 +202,18 @@ const HomeScreen = () => {
       <CustomModal isShown={newBeneficiaryPopup}>
         <NewBeneficiaryPopup
           closePopup={() => (newBeneficiaryPopup.value = 0)}
+        />
+      </CustomModal>
+      <CustomModal isShown={disconnectPopup}>
+        <DisconnectPopup
+          handleDisconnect={handleDisconnect}
+          closePopup={() => (disconnectPopup.value = 0)}
+        />
+      </CustomModal>
+      <CustomModal isShown={transferPopup}>
+        <TransferPopup
+          balance={user?.balance}
+          closePopup={() => (transferPopup.value = 0)}
         />
       </CustomModal>
     </View>

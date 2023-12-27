@@ -7,7 +7,9 @@ import colors from '../styles/colors';
 export type RootStackParamList = {
   LoginScreen: undefined;
   HomeScreen: undefined;
-  ErrorScreen: undefined;
+  ErrorScreen: {
+    text: string;
+  };
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
