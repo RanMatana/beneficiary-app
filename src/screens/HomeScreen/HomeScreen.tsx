@@ -10,8 +10,11 @@ import {
 } from 'react-native';
 import {useSharedValue} from 'react-native-reanimated';
 import {logoutUser} from '../../api';
-import CustomModal from '../../components/CustomModal';
-import NewBeneficiaryPopup from '../../components/NewBeneficiaryPopup';
+import {
+  NewBeneficiaryPopup,
+  CustomModal,
+  CustomTextInput,
+} from '../../components';
 import {useAppDispatch, useAppSelector} from '../../redux';
 import {setBeneficiaries} from '../../redux/features/BeneficiariesSlice';
 import {RootStackParamList} from '../../routes/RootNavigator';
@@ -28,6 +31,7 @@ import {deleteJson, readJson, writeJson} from '../../utils/fs';
 import {removeItemFromKeychain} from '../../utils/keychain';
 import logger from '../../utils/logger';
 import styles from './HomeScreenStyle';
+import {RootState} from '../../redux/store';
 
 type FlatListItem = {
   item: ContactType;
@@ -40,7 +44,7 @@ const HomeScreen = () => {
   const [user, setUser] = useState<IUserData>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const dispatch = useAppDispatch();
-  const {contacts} = useAppSelector(state => state.beneficiaries);
+  const {contacts} = useAppSelector((state: RootState) => state.beneficiaries);
   const newBeneficiaryPopup = useSharedValue(0);
 
   useEffect(() => {

@@ -9,8 +9,8 @@ export default StyleSheet.create({
     backgroundColor: colors.background,
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 120,
+    height: 120,
     resizeMode: 'contain',
   },
 });

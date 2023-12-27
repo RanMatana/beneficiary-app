@@ -1,10 +1,10 @@
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import React, {useState} from 'react';
-import {Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {Text, View} from 'react-native';
 import {loginUser} from '../../api';
+import {CustomButton, CustomTextInput} from '../../components';
 import {RootStackParamList} from '../../routes/RootNavigator';
-import colors from '../../styles/colors';
 import styles from './LoginScreenStyle';
 
 const LoginScreen = () => {
@@ -25,27 +25,17 @@ const LoginScreen = () => {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={[styles.text, styles.text_header]}>Welcome back!</Text>
-        <TextInput
+        <CustomTextInput
           value={username}
           onChangeText={setUsername}
           placeholder="username"
-          style={styles.input}
-          placeholderTextColor={colors.gray}
         />
-        <TextInput
+        <CustomTextInput
           value={password}
           onChangeText={setPassword}
           placeholder="password"
-          style={styles.input}
-          placeholderTextColor={colors.gray}
         />
-        <TouchableOpacity
-          onPress={onSubmit}
-          hitSlop={10}
-          disabled={!disabled}
-          style={[styles.btn, {opacity: disabled ? 1 : 0.4}]}>
-          <Text style={styles.text}>connect</Text>
-        </TouchableOpacity>
+        <CustomButton title="Connect" onPress={onSubmit} disabled={disabled} />
       </View>
     </View>
   );

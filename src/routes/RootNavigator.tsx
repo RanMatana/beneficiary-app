@@ -46,7 +46,9 @@ const RootNavigator = () => {
       <RootStack.Screen
         name={'HomeScreen'}
         component={HomeScreen}
-        options={{headerTitle: 'Account number: ----'}}
+        options={{
+          headerTitle: 'Loading your account...',
+        }}
       />
     </RootStack.Navigator>
   );

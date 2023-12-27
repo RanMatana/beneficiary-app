@@ -14,7 +14,7 @@ const BeneficiariesSlice = createSlice({
   initialState,
   reducers: {
     addBeneficiaries: (state: State, action: {payload: ContactType}) => {
-      state.contacts.push(action.payload);
+      state.contacts.unshift(action.payload);
     },
     setBeneficiaries: (state: State, action: {payload: ContactType[]}) => {
       state.contacts = action.payload;
